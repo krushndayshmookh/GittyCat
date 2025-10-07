@@ -6,3 +6,13 @@
 //
 
 import Foundation
+
+final class LogStore: ObservableObject {
+    @Published var lines: [String] = []
+
+    func append(_ s: String) {
+        DispatchQueue.main.async {
+            self.lines.append("[\(Date())] " + s)
+        }
+    }
+}

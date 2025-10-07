@@ -9,9 +9,17 @@ import SwiftUI
 
 @main
 struct GittyCatApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject private var syncManager = SyncManager()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
+                .environmentObject(syncManager)
+                .onAppear {
+                    appDelegate.syncManager = syncManager
+                }
         }
+        .defaultSize(width: 800, height: 520)
     }
 }
