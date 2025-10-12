@@ -82,7 +82,17 @@ struct ConfigWizard: View {
             }
 
             if let err = lastError {
-                Text(err).foregroundColor(.red).font(.caption)
+                HStack {
+                    Text(err).font(.caption2).foregroundColor(.red)
+                    Spacer()
+                    Button("Copy Error Details") {
+                        let pasteboard = NSPasteboard.general
+                        pasteboard.clearContents()
+                        pasteboard.setString(err, forType: .string)
+                    }
+                    .buttonStyle(.borderless)
+                    .font(.caption2)
+                }
             }
 
             HStack {
