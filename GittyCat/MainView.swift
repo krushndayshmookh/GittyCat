@@ -20,7 +20,17 @@ struct MainView: View {
 
             Text(sync.lastStatus).font(.caption)
             if let err = sync.lastError {
-                Text(err).font(.caption2).foregroundColor(.red)
+                HStack {
+                    Text(err).font(.caption2).foregroundColor(.red)
+                    Spacer()
+                    Button("Copy Error Details") {
+                        let pasteboard = NSPasteboard.general
+                        pasteboard.clearContents()
+                        pasteboard.setString(err, forType: .string)
+                    }
+                    .buttonStyle(.borderless)
+                    .font(.caption2)
+                }
             }
 
             Divider()
