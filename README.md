@@ -132,6 +132,12 @@ If you’d like to fix bugs, improve the UI, or add features:
 
 Please follow Swift style conventions and add clear commit messages.
 
+## Code of Conduct
+
+This project follows the [Contributor Covenant Code of Conduct](./CODE_OF_CONDUCT.md).  
+By participating, you agree to uphold this code.
+
+
 ---
 
 ## 🐙 License
