@@ -18,8 +18,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Create status bar icon
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
-            // Use a system symbol; replace with a custom template image if you like
-            button.image = NSImage(systemSymbolName: "cat.fill", accessibilityDescription: "GittyCat")
+            // Prefer a template asset named "StatusBarIcon" (added to Assets.xcassets)
+            // Fallback to SF Symbol. Ensure the image is rendered as a template so it
+            // adapts to light/dark system appearances in the menu bar.
+            if let assetImage = NSImage(named: "StatusBarIcon") {
+                assetImage.isTemplate = true
+                button.image = assetImage
+            } else if let symbol = NSImage(systemSymbolName: "cat.fill", accessibilityDescription: "GittyCat") {
+                // Use a small symbol configuration for proper sizing in the status bar
+                if #available(macOS 11.0, *) {
+                    let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .regular)
+                    let configured = symbol.withSymbolConfiguration(config) ?? symbol
+                    configured.isTemplate = true
+                    button.image = configured
+                } else {
+                    symbol.isTemplate = true
+                    button.image = symbol
+                }
+            }
             button.action = #selector(toggleMainWindow)
             button.target = self
         }
