@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Delete old prerelease
+        if: github.ref_type == 'branch'
+        uses: dev-drprasad/delete-tag-and-release@v0.2.1
+        with:
+          delete_release: true
+          tag_name: prerelease
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set version for tag
+        if: github.ref_type == 'tag'
+        run: echo "version=$(git describe --tags --match 'v*')" >> $GITHUB_ENV
+
+      - name: Set version for branch
+        if: github.ref_type == 'branch'
+        run: echo "version=$(git describe --tags)" >> $GITHUB_ENV
+
+      - name: Build
+        run: |
+          xcodebuild archive -project GittyCat.xcodeproj -scheme GittyCat -configuration Release -archivePath GittyCat.xcarchive MARKETING_VERSION=${{github.ref_name}}
+          xcodebuild archive -archivePath GittyCat.xcarchive -exportArchive -exportOptionsPlist export_options.plist -exportPath .
+          zip -r "GittyCat-${{env.version}}.zip" "GittyCat.app"
+
+      - name: Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: GittyCat-${{env.version}}.zip
+
+      - name: Prerelease
+        if: github.ref_type == 'branch'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: prerelease
+          prerelease: true
+          files: GittyCat-${{env.version}}.zip

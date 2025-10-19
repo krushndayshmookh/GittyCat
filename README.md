@@ -116,7 +116,7 @@ open GittyCat.xcodeproj
 - [ ] Conflict resolution UI  
 - [ ] Auto .gitignore editor  
 - [ ] Secure bookmark access for Sandbox build  
-- [ ] Signed release on GitHub
+- [x] Signed release on GitHub
 
 ---
 
