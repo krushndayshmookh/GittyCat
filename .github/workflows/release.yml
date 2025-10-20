@@ -13,7 +13,6 @@ env:
   SCHEME: GittyCat
   ARCHIVE_PATH: GittyCat.xcarchive
   EXPORT_PATH: .
-  ZIP_NAME: GittyCat-${{ env.VERSION }}.zip
   SIGNING_METHOD: adhoc # Set to 'adhoc' for free signing, 'developer' for proper signing + notarization
 
 jobs:
@@ -37,11 +36,11 @@ jobs:
 
       - name: Set version for tag
         if: github.ref_type == 'tag'
-        run: echo "VERSION=$(git describe --tags --match 'v*')" >> $GITHUB_ENV
+        run: echo "ZIP_NAME=${{ env.APP_NAME }}-$(git describe --tags --match 'v*').zip" >> $GITHUB_ENV
 
       - name: Set version for branch
         if: github.ref_type == 'branch'
-        run: echo "VERSION=$(git describe --tags)" >> $GITHUB_ENV
+        run: echo "ZIP_NAME=${{ env.APP_NAME }}-$(git describe --tags).zip" >> $GITHUB_ENV
 
       - name: Build
         run: |
