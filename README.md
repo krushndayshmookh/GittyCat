@@ -22,6 +22,24 @@ It’s perfect for:
 
 ---
 
+## 📦 Installation
+
+Download the latest release [here](https://github.com/krushndayshmookh/GittyCat/releases/latest/) or install using Homebrew:
+
+```bash
+$ brew install --cask gittycat
+```
+
+If the app doesn't start, install using the `--no-quarantine` flag:
+
+```bash
+$ brew install --cask --no-quarantine gittycat
+```
+
+> 🐱 **Note:** GittyCat requires macOS 13 (Ventura) or later and needs access to your folders for syncing. You'll be prompted to grant permissions on first launch.
+
+---
+
 ## 🚀 Features
 
 - 🧠 **Smart Auto-Sync:** Periodic commits and pushes based on your schedule.  
