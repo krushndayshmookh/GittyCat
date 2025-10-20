@@ -51,8 +51,9 @@ jobs:
             -archivePath ${{ env.ARCHIVE_PATH }} \
             MARKETING_VERSION=${{ github.ref_name }}
           
-          xcodebuild exportArchive \
+          xcodebuild archive \
             -archivePath ${{ env.ARCHIVE_PATH }} \
+            -exportArchive \
             -exportOptionsPlist export_options.plist \
             -exportPath ${{ env.EXPORT_PATH }}
 
