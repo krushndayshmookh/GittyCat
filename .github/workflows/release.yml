@@ -7,6 +7,15 @@ on:
     tags:
       - 'v*'
 
+env:
+  APP_NAME: GittyCat
+  PROJECT_FILE: GittyCat.xcodeproj
+  SCHEME: GittyCat
+  ARCHIVE_PATH: GittyCat.xcarchive
+  EXPORT_PATH: .
+  ZIP_NAME: GittyCat-${{ env.VERSION }}.zip
+  SIGNING_METHOD: adhoc # Set to 'adhoc' for free signing, 'developer' for proper signing + notarization
+
 jobs:
   build:
     runs-on: macos-15
@@ -28,23 +37,56 @@ jobs:
 
       - name: Set version for tag
         if: github.ref_type == 'tag'
-        run: echo "version=$(git describe --tags --match 'v*')" >> $GITHUB_ENV
+        run: echo "VERSION=$(git describe --tags --match 'v*')" >> $GITHUB_ENV
 
       - name: Set version for branch
         if: github.ref_type == 'branch'
-        run: echo "version=$(git describe --tags)" >> $GITHUB_ENV
+        run: echo "VERSION=$(git describe --tags)" >> $GITHUB_ENV
 
       - name: Build
         run: |
-          xcodebuild archive -project GittyCat.xcodeproj -scheme GittyCat -configuration Release -archivePath GittyCat.xcarchive MARKETING_VERSION=${{github.ref_name}}
-          xcodebuild archive -archivePath GittyCat.xcarchive -exportArchive -exportOptionsPlist export_options.plist -exportPath .
-          zip -r "GittyCat-${{env.version}}.zip" "GittyCat.app"
+          xcodebuild archive \
+            -project ${{ env.PROJECT_FILE }} \
+            -scheme ${{ env.SCHEME }} \
+            -configuration Release \
+            -archivePath ${{ env.ARCHIVE_PATH }} \
+            MARKETING_VERSION=${{ github.ref_name }}
+          
+          xcodebuild exportArchive \
+            -archivePath ${{ env.ARCHIVE_PATH }} \
+            -exportOptionsPlist export_options.plist \
+            -exportPath ${{ env.EXPORT_PATH }}
+
+      - name: Ad-hoc sign
+        if: env.SIGNING_METHOD == 'adhoc'
+        uses: indygreg/apple-code-sign-action@v1
+        with:
+          input_path: ${{ env.APP_NAME }}.app
+
+      - name: Prepare certificate
+        if: env.SIGNING_METHOD == 'developer'
+        run: echo "${{ secrets.APPLE_CERTIFICATE }}" | base64 --decode > cert.p12
+
+      - name: Sign and notarize
+        if: env.SIGNING_METHOD == 'developer'
+        uses: indygreg/apple-code-sign-action@v1
+        with:
+          input_path: ${{ env.APP_NAME }}.app
+          notarize: true
+          staple: true
+          p12_file: cert.p12
+          p12_password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          app_store_connect_api_issuer: ${{ secrets.APPLE_API_ISSUER }}
+          app_store_connect_api_key: ${{ secrets.APPLE_API_KEY }}
+
+      - name: Create zip
+        run: zip -r "${{ env.ZIP_NAME }}" "${{ env.APP_NAME }}.app"
 
       - name: Release
         if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v1
         with:
-          files: GittyCat-${{env.version}}.zip
+          files: ${{ env.ZIP_NAME }}
 
       - name: Prerelease
         if: github.ref_type == 'branch'
@@ -52,4 +94,4 @@ jobs:
         with:
           tag_name: prerelease
           prerelease: true
-          files: GittyCat-${{env.version}}.zip
+          files: ${{ env.ZIP_NAME }}
